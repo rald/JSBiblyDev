@@ -139,29 +139,34 @@ function loadDoc(url,readyStateChange) {
 
 function parseInfo(info) {
 
-	for(i=0;i<info.length;i++) {
+	var result=[];
 
-		var tmp=tokstr(info[i],"|");
+	for(var i=0;i<info.length;i++) {
+
+		var tmp=tokstr(info[i],"|",4);
 		var bname=tmp[0];
 		var sname=tokstr(tmp[1],"/");
 		var bnum=tmp[2];
 		var nchap=parseInt(tmp[3]);
 
-		var a=tokstr(tmp[4],",");
-		for(var j=0;j<a.length;j++) {
-			nvers.push(parseInt(a[j]));
+		var nvers=[];
+		var v=tokstr(tmp[4],",");
+		for(var j=0;j<v.length;j++) {
+			nvers.push(parseInt(v[j]));
 		}
 
 
-		return {
+		result.push({
 			"bname":bname,
 			"sname":sname,
 			"bnum":bnum,
 			"nchap":nchap,
 			"nvers":nvers
-		};
+		});
 
 	}
+
+	return result;
 
 }
 
@@ -278,13 +283,25 @@ function printTTSVerse(cite) {
 
 }
 
+function printInfo(info) {
+	print(`bname:&nbsp;${info.bname}<br>`);
+	print(`sname:&nbsp;${info.sname}<br>`);
+	print(`bnum:&nbsp;${info.bnum}<br>`);
+	print(`nchap:&nbsp;${info.nchap}<br>`);
+	print(`nvers:&nbsp;${info.nvers}<br><br>`);
+}
+
 function send() {
 	try {
+
+		var i=rnd(bible.length);
+		var cite=parseLine(bible[i]);
+
 		clear();
 
-		for(var i=0;i<100;i++) {
-			printTTSVerse(parseLine(bible[rnd(bible.length)]));
-		}
+		printInfo(getInfo(info,cite.bname));
+		printTTSVerse(cite);
+
 
 	} catch(e) {
 		print("Error: "+e.name+": "+e.message+"<br>");
