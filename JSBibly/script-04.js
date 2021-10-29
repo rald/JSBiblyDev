@@ -11,6 +11,13 @@ var output=document.getElementById("output");
 
 
 
+var synth = window.speechSynthesis;
+var voices = [];
+
+var verses = document.querySelectorAll('.vers');
+
+
+
 function tokstr(s,d,n=0) {
 	var i=0,j=0,k=0;
 	var a=[];
@@ -32,6 +39,48 @@ function rnd(x) {
 
 function print(html) {
 	output.insertAdjacentHTML("beforeend",html);
+}
+
+function populateVoiceList() {
+  voices = synth.getVoices().sort(function (a, b) {
+      const aname = a.name.toUpperCase(), bname = b.name.toUpperCase();
+      if ( aname < bname ) return -1;
+      else if ( aname == bname ) return 0;
+      else return +1;
+  });
+}
+
+function printVoicesInfo() {
+  	for(var i=0;i<voices.length;i++) {
+		print("["+i+"] "+voices[i].name+" -> "+voices[i].lang+"<br>");
+	}
+}
+
+function speak(text,voice,rate=1,pitch=1){
+	if (synth.speaking) {
+		synth.cancel();
+		/*
+		console.error('speechSynthesis.speaking');
+		return;
+		*/
+	}
+
+	if (text !== '') {
+		var utterThis = new SpeechSynthesisUtterance(text);
+
+		utterThis.onend = function (event) {
+			console.log('SpeechSynthesisUtterance.onend');
+		}
+
+		utterThis.onerror = function (event) {
+			console.error('SpeechSynthesisUtterance.onerror');
+		}
+
+		utterThis.voice = voice;
+		utterThis.pitch = pitch;
+		utterThis.rate = rate;
+		synth.speak(utterThis);
+  	}
 }
 
 function clear() {
@@ -155,10 +204,6 @@ function getInfo(info,book) {
 	return null;
 }
 
-function getNumberOfBooks(info) {
-  return info.length;
-}
-
 function getBookNumber(info,book) {
 	for(var i=0;i<info.length;i++) {
 		if(book==info[i].bname) {
@@ -219,7 +264,7 @@ window.addEventListener("load",function() {
 
 });
 
-function versClick() {
+function verseClick() {
 	speak(this.querySelector(".vers").textContent,voices[15],1,1);
 }
 
@@ -231,8 +276,9 @@ function printTTSVerse(cite) {
 				"<span class='vers'>"+cite.vers+"</span>"+
 				"</a></div><br>");
 
-	var link = document.querySelector("div.verse a:last-child");
-	link.addEventListener("click",versClick,true);
+	var verses = document.querySelectorAll("div.verse");
+	var link=verses[verses.length-1].querySelector("a");
+	link.addEventListener("click",verseClick,true);
 
 }
 
@@ -244,21 +290,16 @@ function printInfo(info) {
 	print(`nvers:&nbsp;${info.nvers}<br><br>`);
 }
 
-function printCite(cite) {
-	print(`bname:&nbsp;${cite.bname}<br>`);
-	print(`cnum:&nbsp;${cite.cnum}<br>`);
-	print(`vnum:&nbsp;${cite.vnum}<br>`);
-	print(`vers:&nbsp;${cite.vers}<br><br>`);
-}
-
 function send() {
 	try {
 
+
 		clear();
 
-    for(var i=0;i<getNumberOfBooks(info);i++) {
-      printInfo(getInfo(info,info[i].bname));
-    }
+    var token=new Token(Token.Type.Integer,"143");
+
+    print(JSON.stringify(token.toString()));
+
 
 	} catch(e) {
 		print("Error: "+e.name+": "+e.message+"<br>");

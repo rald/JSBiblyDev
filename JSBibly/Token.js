@@ -1,21 +1,19 @@
-class Token  {
+var TokenType = {
+  NONE:"NONE",
+  INTEGER:"integer",
+  STRING:"string",
+  SYMBOL:"symbol",
+  EOF:"eof"
+};
 
-	const Type = 	{
-				NONE:"none",
-				INTEGER:"integer",
-				STRING:"string",
-				SYMBOL:"symbol",
-				WHITESPACE:"whitespace",
-				EOF:"eof"
-			}
 
-	constructor(type,text) {
-		this.type=type;
-		this.text=text;
+
+function Token(type,text) {
+	this.type=type;
+	this.text=text;
+
+	this.stringify=function() {
+		return JSON.stringify({Type:this.type,Text:this.text});
 	}
-
-	toString() {
-		return `{ "Type": "${this.type}", "Text": "${this.text}" }`;
-	}
-
 }
+

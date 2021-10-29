@@ -1,13 +1,14 @@
 var BibleCSVFile="kjv.csv";
 var BibleInfoFile="kjv.inf";
 
-var bible=null;
+var bibly=null;
 var info=null;
+
+var command=document.getElementById("command");
+var output=document.getElementById("output");
 
 var modal=document.getElementById("modal");
 var modalContent=document.getElementById("modal-content");
-var command=document.getElementById("command");
-var output=document.getElementById("output");
 
 
 
@@ -26,6 +27,11 @@ function tokstr(s,d,n=0) {
 	return a.filter(i=>i);
 }
 
+function getRandomKey(object) {
+  var keys=Object.keys(object);
+  return keys[rnd(keys.length)];
+}
+
 function rnd(x) {
 	return Math.floor(Math.random()*x);
 }
@@ -38,61 +44,10 @@ function clear() {
 	output.innerHTML="";
 }
 
-function updateProgress(e) {
-	if(e.lengthComputable) {
-		var percent = Math.floor(e.loaded / e.total * 10000) / 100;
-		print("Loading "+percent+"&percnt;<br>");
-	} else {
-		print("Loading...<br>");
-	}
-}
-
-function transferStart(e) {
-	print("Transfer Started<br>");
-}
-
-function transferComplete(e) {
-	print("Transfer Complete<br>");
-}
-
-function transferEnd(e) {
-	print("Transfer End<br>");
-}
-
-function transferFailed(e) {
-	print("Transfer Failed<br>");
-}
-
-function transferCanceled(e) {
-	print("Transfer Canceled<br>");
-}
-
-function loadDoc(url,readyStateChange) {
-
-	var xhttp = new XMLHttpRequest();
-
-	xhttp.addEventListener("loadstart", transferStart, false);
-	xhttp.addEventListener("load", transferComplete, false);
-	xhttp.addEventListener("loadend", transferEnd, false);
-	xhttp.addEventListener("progress", updateProgress, false);
-	xhttp.addEventListener("error", transferFailed, false);
-	xhttp.addEventListener("abort", transferCanceled, false);
-	xhttp.addEventListener("readystatechange", readyStateChange, false);
-
-	xhttp.open("GET", url, true);
-
-	xhttp.send();
-
-	return xhttp;
-}
-
-
-function parseInfo(info) {
-
+function parseInfo(csv) {
 	var result=[];
-
+  var info=csv.split("\n").filter(i=>i);
 	for(var i=0;i<info.length;i++) {
-
 		var tmp=tokstr(info[i],"|",4);
 		var bname=tmp[0];
 		var sname=tokstr(tmp[1],"/");
@@ -105,7 +60,6 @@ function parseInfo(info) {
 			nvers.push(parseInt(v[j]));
 		}
 
-
 		result.push({
 			"bname":bname,
 			"sname":sname,
@@ -113,11 +67,9 @@ function parseInfo(info) {
 			"nchap":nchap,
 			"nvers":nvers
 		});
-
 	}
 
 	return result;
-
 }
 
 function parseLine(line) {
@@ -129,13 +81,35 @@ function parseLine(line) {
 	var vnum=parseInt(cv[1]);
 	var vers=tmp[2];
 
+  var ch=bname[0];
+  var n=parseInt(ch);
+
+  n=isNaN(n)?0:n;
+
+  var th=["","1st","2nd","3rd"];
+  var nth=th[n];
+  var bname2=n>0?bname.substring(2):bname;
+
 	return {
 		"bname":bname,
 		"cnum":cnum,
 		"vnum":vnum,
-		"vers":vers
+		"vers":vers,
+    "text":nth+" "+bname2+"; Chapter "+cnum+", Verse "+vnum+": "+vers
 	};
 
+}
+
+function parseBibly(csv) {
+  var result={};
+  var vpl=csv.split("\n").filter(i=>i);
+  for(var i=0;i<vpl.length;i++) {
+    var passage=parseLine(vpl[i]);
+    result[ passage.bname.replaceAll(" ","_")+"__"+
+            passage.cnum+"_"+
+            passage.vnum]=passage;
+  }
+  return result;
 }
 
 function getBooks(info) {
@@ -177,7 +151,6 @@ function getShortNames(info,book) {
 	return null;
 }
 
-
 function getNumberOfChapters(info,book) {
 	for(var i=0;i<info.length;i++) {
 		if(book==info[i].bname) {
@@ -200,14 +173,13 @@ window.addEventListener("load",function() {
 
 	loadDoc(BibleInfoFile,function() {
 		if(this.readyState == 4 && this.status == 200) {
-			info=parseInfo(this.responseText.split("\n").filter(i=>i));
+			info=parseInfo(this.responseText);
 		}
 	});
 
-
 	loadDoc(BibleCSVFile,function() {
 		if(this.readyState == 4 && this.status == 200) {
-			bible=this.responseText.split("\n").filter(i=>i);
+      bibly=parseBibly(this.responseText);
 		}
 	});
 
@@ -219,20 +191,21 @@ window.addEventListener("load",function() {
 
 });
 
-function versClick() {
-	speak(this.querySelector(".vers").textContent,voices[15],1,1);
+function passageClick() {
+	speak(this.querySelector(".text").textContent,voices[15],1,1);
 }
 
-function printTTSVerse(cite) {
-		print("<div class='verse'><a href='#' style='text-decoration:none;color:black;'>"+
-				"<b><span class='bname'>"+cite.bname+"</span> "+
-				"<span class='cnum'>"+cite.cnum+"</span>:"+
-				"<span class='vnum'>"+cite.vnum+"</span></b> "+
-				"<span class='vers'>"+cite.vers+"</span>"+
+function printTTSPassage(passage) {
+		print("<div class='passage'><a href='#' style='text-decoration:none;color:black;'>"+
+				"<b><span class='bname'>"+passage.bname+"</span> "+
+				"<span class='cnum'>"+passage.cnum+"</span>:"+
+				"<span class='vnum'>"+passage.vnum+"</span></b> "+
+				"<span class='vers'>"+passage.vers+"</span>"+
+				"<span class='text' style='display:none'>"+passage.text+"</span>"+
 				"</a></div><br>");
 
-	var link = document.querySelector("div.verse a:last-child");
-	link.addEventListener("click",versClick,true);
+	var link = document.querySelector("div.passage a:last-child");
+	link.addEventListener("click",passageClick,true);
 
 }
 
@@ -244,25 +217,11 @@ function printInfo(info) {
 	print(`nvers:&nbsp;${info.nvers}<br><br>`);
 }
 
-function printCite(cite) {
-	print(`bname:&nbsp;${cite.bname}<br>`);
-	print(`cnum:&nbsp;${cite.cnum}<br>`);
-	print(`vnum:&nbsp;${cite.vnum}<br>`);
-	print(`vers:&nbsp;${cite.vers}<br><br>`);
+function printPassage(passage) {
+	print(`bname:&nbsp;${passage.bname}<br>`);
+	print(`cnum:&nbsp;${passage.cnum}<br>`);
+	print(`vnum:&nbsp;${passage.vnum}<br>`);
+	print(`vers:&nbsp;${passage.vers}<br>`);
+	print(`text:&nbsp;${passage.text}<br><br>`);
 }
-
-function send() {
-	try {
-
-		clear();
-
-    for(var i=0;i<getNumberOfBooks(info);i++) {
-      printInfo(getInfo(info,info[i].bname));
-    }
-
-	} catch(e) {
-		print("Error: "+e.name+": "+e.message+"<br>");
-	}
-}
-
 

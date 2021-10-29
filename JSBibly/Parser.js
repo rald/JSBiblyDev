@@ -1,56 +1,67 @@
-class Parser {
+function Parser(tokens) {
 
-	constructor(tokens) {
-		this.tokens=tokens;
-		this.currentTokenIndex=0;
-	}
+	this.tokens=tokens;
+	this.currentTokenIndex=0;
 
-	getInteger() {
-		if(this.tokens[this.currentTokenIndex].type==Token.Type.INTEGER) {
+	this.nextInteger=function() {
+		if(this.tokens[this.currentTokenIndex].type==TokenType.INTEGER) {
 			return parseInt(this.tokens[this.currentTokenIndex++].text);
 		} else {
 			return null;
 		}
 	}
 
-	getString() {
-		if(this.tokens[this.currentTokenIndex].type==Token.Type.STRING) {
+	this.nextString=function() {
+		if(this.tokens[this.currentTokenIndex].type==TokenType.STRING) {
 			return this.tokens[this.currentTokenIndex++].text;
 		} else {
 			return null;
 		}
 	}
 
-	getSymbol() {
-		if(this.tokens[this.currentTokenIndex].type==Token.Type.SYMBOL) {
+	this.nextSymbol=function() {
+		if(this.tokens[this.currentTokenIndex].type==TokenType.SYMBOL) {
 			return this.tokens[this.currentTokenIndex++].text;
 		} else {
 			return null;
 		}
 	}
 
-	getCurrentType() {
+	this.getCurrentTokenType=function() {
 		return this.tokens[this.currentTokenIndex].type;
 	}
 
-	getCurrentText() {
+	this.getCurrentTokenText=function() {
 		return this.tokens[this.currentTokenIndex].type;
 	}
 
-	getTokenAt(tokenIndex) {
-		return this.tokens[tokenIndex];
+	this.getTokenAt=function(index) {
+		return this.tokens[index];
 	}
 
-	nextToken(offset=1) {
-		this.currentTokenIndex+=offset;
+	this.jump=function(offset) {
+		if( this.currentTokenIndex+offset>=0 &&
+		    this.currentTokenIndex+offset<this.tokens.length) {
+		  this.currentTokenIndex+=offset;
+		  return true;
+		}
+		return false
 	}
 
-	prevToken(offset=1) {
-		this.currentTokenIndex-=offset;
+	this.goto=function(index) {
+		if(index>=0 && index<this.tokens.length) {
+  		this.currentTokenIndex=index;
+		  return true;
+		}
+		return false
 	}
 
-	parse() {
+	this.forward=function() {
+		return this.jump(1);
+	}
 
+	this.backward=function() {
+		return this.jump(-1);
 	}
 
 }

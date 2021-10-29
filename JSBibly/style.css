@@ -4,7 +4,6 @@
 	box-sizing: border-box;
 }
 
-
 body {
 	overscroll-behavior: contain;
 }
@@ -78,6 +77,7 @@ html, .fullscreen {
 	height: 100%;
 	padding: 10px;
 	overflow: auto;
+  scroll-behavior: smooth;
 }
 
 .main-flex-items:nth-child(2)  {
@@ -132,7 +132,6 @@ html, .fullscreen {
 #submit-button:not(:hover) {
 	background-color: #00b4ff;
 }
-
 
 #output {
 	word-wrap: break-word;
