@@ -9,11 +9,11 @@ var TokenType = {
 
 
 function Token(type,text) {
-	this.type=type;
-	this.text=text;
+  this.type=type;
+  this.text=text;
 
-	this.stringify=function() {
-		return JSON.stringify({Type:this.type,Text:this.text});
-	}
+  this.toString=function() {
+    return JSON.stringify({"Type":this.type,"Text":this.text});
+  }
+
 }
-

@@ -11,35 +11,35 @@ function populateVoiceList() {
 }
 
 function printVoicesInfo() {
-  	for(var i=0;i<voices.length;i++) {
-		print("["+i+"] "+voices[i].name+" -> "+voices[i].lang+"<br>");
-	}
+    for(var i=0;i<voices.length;i++) {
+    print("["+i+"] "+voices[i].name+" -> "+voices[i].lang+"<br>");
+  }
 }
 
 function speak(text,voice,rate=1,pitch=1){
-	if (synth.speaking) {
-		synth.cancel();
-		/*
-		console.error('speechSynthesis.speaking');
-		return;
-		*/
-	}
+  if (synth.speaking) {
+    synth.cancel();
+    /*
+    console.error('speechSynthesis.speaking');
+    return;
+    */
+  }
 
-	if (text !== '') {
-		var utterThis = new SpeechSynthesisUtterance(text);
+  if (text !== '') {
+    var utterThis = new SpeechSynthesisUtterance(text);
 
-		utterThis.onend = function (event) {
-			console.log('SpeechSynthesisUtterance.onend');
-		}
+    utterThis.onend = function (event) {
+      console.log('SpeechSynthesisUtterance.onend');
+    }
 
-		utterThis.onerror = function (event) {
-			console.error('SpeechSynthesisUtterance.onerror');
-		}
+    utterThis.onerror = function (event) {
+      console.error('SpeechSynthesisUtterance.onerror');
+    }
 
-		utterThis.voice = voice;
-		utterThis.pitch = pitch;
-		utterThis.rate = rate;
-		synth.speak(utterThis);
-  	}
+    utterThis.voice = voice;
+    utterThis.pitch = pitch;
+    utterThis.rate = rate;
+    synth.speak(utterThis);
+    }
 }
 

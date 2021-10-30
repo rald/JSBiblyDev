@@ -1,67 +1,70 @@
 function Parser(tokens) {
 
-	this.tokens=tokens;
-	this.currentTokenIndex=0;
+  this.tokens=tokens;
+  this.currentTokenIndex=0;
 
-	this.nextInteger=function() {
-		if(this.tokens[this.currentTokenIndex].type==TokenType.INTEGER) {
-			return parseInt(this.tokens[this.currentTokenIndex++].text);
-		} else {
-			return null;
-		}
-	}
+  this.getCurrentToken=function() {
+    return this.tokens[this.currentTokenIndex];
+  }
 
-	this.nextString=function() {
-		if(this.tokens[this.currentTokenIndex].type==TokenType.STRING) {
-			return this.tokens[this.currentTokenIndex++].text;
-		} else {
-			return null;
-		}
-	}
+  this.getTokenAt=function(index) {
+    return this.tokens[index];
+  }
 
-	this.nextSymbol=function() {
-		if(this.tokens[this.currentTokenIndex].type==TokenType.SYMBOL) {
-			return this.tokens[this.currentTokenIndex++].text;
-		} else {
-			return null;
-		}
-	}
+  this.walk=function(offset) {
+    if( this.currentTokenIndex+offset>=0 &&
+        this.currentTokenIndex+offset<this.tokens.length) {
+      this.currentTokenIndex+=offset;
+      return true;
+    }
+    return false
+  }
 
-	this.getCurrentTokenType=function() {
-		return this.tokens[this.currentTokenIndex].type;
-	}
+  this.jump=function(index) {
+    if(index>=0 && index<this.tokens.length) {
+      this.currentTokenIndex=index;
+      return true;
+    }
+    return false
+  }
 
-	this.getCurrentTokenText=function() {
-		return this.tokens[this.currentTokenIndex].type;
-	}
+  this.forward=function() {
+    return this.walk(1);
+  }
 
-	this.getTokenAt=function(index) {
-		return this.tokens[index];
-	}
+  this.backward=function() {
+    return this.walk(-1);
+  }
 
-	this.jump=function(offset) {
-		if( this.currentTokenIndex+offset>=0 &&
-		    this.currentTokenIndex+offset<this.tokens.length) {
-		  this.currentTokenIndex+=offset;
-		  return true;
-		}
-		return false
-	}
+  this.match=function(type) {
+    return this.getCurrentToken().type==type;
+  }
 
-	this.goto=function(index) {
-		if(index>=0 && index<this.tokens.length) {
-  		this.currentTokenIndex=index;
-		  return true;
-		}
-		return false
-	}
+  this.nextInteger=function() {
+    var result=null;
+    if(this.match(TokenType.INTEGER)) {
+      result=parseInt(this.getCurrentToken().text);
+      this.forward();
+    }
+    return result;
+  }
 
-	this.forward=function() {
-		return this.jump(1);
-	}
+  this.nextString=function() {
+    var result=null;
+    if(this.match(TokenType.STRING)) {
+      result=this.getCurrentToken().text;
+      this.forward();
+    }
+    return result;
+  }
 
-	this.backward=function() {
-		return this.jump(-1);
-	}
+  this.nextSymbol=function() {
+    var result=null;
+    if(this.match(TokenType.SYMBOL)) {
+      result=this.getCurrentToken().text;
+      this.forward();
+    }
+    return result;
+  }
 
 }
