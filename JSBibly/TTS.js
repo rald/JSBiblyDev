@@ -11,21 +11,19 @@ function populateVoiceList() {
 }
 
 function printVoicesInfo() {
-    for(var i=0;i<voices.length;i++) {
-    print("["+i+"] "+voices[i].name+" -> "+voices[i].lang+"<br>");
+  for(var i=0;i<voices.length;i++) {
+    print("["+i+"] "+voices[i].name+" -- "+voices[i].lang+"\n");
   }
 }
 
-function speak(text,voice,rate=1,pitch=1){
-  if (synth.speaking) {
+function speak(text,voice,rate=1,pitch=1) {
+
+  if(synth.speaking) {
+    console.log('SpeechSynthesis.speaking');
     synth.cancel();
-    /*
-    console.error('speechSynthesis.speaking');
-    return;
-    */
   }
 
-  if (text !== '') {
+  if(text) {
     var utterThis = new SpeechSynthesisUtterance(text);
 
     utterThis.onend = function (event) {
@@ -40,6 +38,6 @@ function speak(text,voice,rate=1,pitch=1){
     utterThis.pitch = pitch;
     utterThis.rate = rate;
     synth.speak(utterThis);
-    }
+  }
 }
 

@@ -1,8 +1,9 @@
 var LexerState = {
-  DEFAULT:"default",
-  INTEGER:"integer",
-  STRING:"string",
-  SYMBOL:"symbol"
+  "DEFAULT":"default",
+  "INTEGER":"integer",
+  "STRING":"string",
+  "SYMBOL":"symbol",
+  "EOF":"eof"
 }
 
 function isDigit(c) {
@@ -23,23 +24,26 @@ function lex(str) {
   var text="";
   var ch="";
   var state=LexerState.DEFAULT;
-  var currTokenType=TokenType.NONE;
+  var type=TokenType.NONE;
 
   while(i<str.length) {
+
     ch=str[i];
+
     switch(state) {
+
       case LexerState.DEFAULT:
         if(isAlpha(ch) || ch==' ') {
           state=LexerState.STRING;
-          currTokenType=TokenType.STRING;
+          type=TokenType.STRING;
           i--;
         } else if(isDigit(ch)) {
           state=LexerState.INTEGER;
-          currTokenType=TokenType.INTEGER;
+          type=TokenType.INTEGER;
           i--;
         } else if(isSymbol(ch)) {
           state=LexerState.SYMBOL;
-          currTokenType=TokenType.SYMBOL;
+          type=TokenType.SYMBOL;
           i--;
         }
       break;
@@ -53,7 +57,7 @@ function lex(str) {
             tokens.push(new Token(TokenType.STRING,text.trim()));
             text="";
           }
-          currTokenType=TokenType.NONE;
+          type=TokenType.NONE;
           state=LexerState.DEFAULT;
           i--;
         }
@@ -64,7 +68,7 @@ function lex(str) {
           text+=ch;
         } else {
           tokens.push(new Token(TokenType.INTEGER,text));
-          currTokenType=TokenType.NONE;
+          type=TokenType.NONE;
           state=LexerState.DEFAULT;
           text="";
           i--;
@@ -74,19 +78,22 @@ function lex(str) {
       case LexerState.SYMBOL:
         if(isSymbol(ch)) {
           tokens.push(new Token(TokenType.SYMBOL,ch));
-          currTokenType=TokenType.NONE;
+          type=TokenType.NONE;
           state=LexerState.DEFAULT;
         }
       break;
 
-      default: break;
     }
+
     i++;
+
   }
-  if(currTokenType!=TokenType.NONE) {
-    tokens.push(new Token(currTokenType,text));
+
+  if(type!=TokenType.NONE) {
+    tokens.push(new Token(type,text));
   }
+
   tokens.push(new Token(TokenType.EOF,TokenType.EOF));
+
   return tokens;
 }
-

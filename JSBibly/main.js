@@ -1,190 +1,115 @@
-var parser=null;
-
-function Range(start,end) {
-  this.start=start;
-  this.end=end;
-}
-
-function CR(sc,ec) {
-  this.type="cr";
-  this.value=new Range(sc,ec);
-}
-
-function VR(c,sv,ev) {
-  this.type="vr";
-  this.cnum=c;
-  this.value=new Range(sv,ev);
-}
-
-function BN(b) {
-  this.type="b";
+function OB(b) {
   this.bname=b;
 }
 
-function CN(c) {
-  this.type="c";
-  this.cnum=c;
-}
-
-function VN(c,v) {
-  this.type="v";
+function OBCV(b,c,v) {
+  this.bname=b;
   this.cnum=c;
   this.vnum=v;
 }
 
-function BR(b,r) {
-  this.type="br";
-  this.bname=b;
-  this.range=r;
+
+
+
+function H(p,b) {
+  print("H");
+  return new Atom(AtomType.B,new OB(b);
 }
 
-function G(c) {
-  var v=parser.nextInteger();
-  if(v) {
-    switch(parser.nextSymbol()) {
-      case ',':
-        var r=[];
-        r.push(new VN(c,v))
-        r.push(B());
-      return r;
-      case '-':
-        return F(c,v);
-      case ";":
-        parser.backward();
-        return new VN(c,v);
-      case null:
-        return new VN(c,v);
-      default:
-      break;
-    }
+function G(p,b,c,v) {
+  print("G");
+  return new Atom(AtomType.BCV,new OBCV(b,c,v));
+}
+
+function F(p,b,c) {
+  print("F");
+  var result=null;
+  var v=p.nextInteger();
+  if(typeof v === "integer") {
+    result=G(p,b,c,v);
   }
-  return null;
+  return result;
 }
 
-function F(c,sv) {
- var ev=parser.nextInteger();
- if(ev) {
-  return new VR(c,sv,ev);
- }
- return new VN(c,sv);
-}
-
-function E(c,v) {
-  switch(parser.nextSymbol()) {
+function E(p,b,c) {
+  print("E");
+  var result=[];
+  switch(p.nextSymbol()) {
     case ':':
-      return C(c);
-    break;
-    case '-':
-      return F(c,v);
-    break;
-    case ',':
-      var r=[];
-      r.push(new VN(c,v));
-      r.push(G(c));
-      return r;
-    case ';':
-      parser.backward();
-      return new VN(c,v);
-    case null:
-      return new VN(c,v);
-    break;
+      result.push(F(p,b,c));
+      break;
     default:
     break;
   }
-  return null;
+  return result.flat();
 }
 
-function D(sc) {
-  var ec=parser.nextInteger();
-  if(ec) {
-    return new CR(sc,ec);
+function D(p,b) {
+  print("D");
+  var result=null;
+  var c=p.nextInteger();
+  if(typeof c === "integer") {
+    result=E(p,b,c);
+  } else {
+    result=H(p,b);
   }
-  return new CN(sc);
-}
-
-function C(c) {
-  var v=parser.nextInteger();
-  if(v) {
-    return E(c,v);
-  }
-  return new CN(c);
-}
-
-function B() {
-  var c=parser.nextInteger();
-  if(c) {
-    switch(parser.nextSymbol()) {
-      case ':':
-        return C(c);
-      break;
-      case '-':
-        return D(c);
-      break;
-      case ";":
-        parser.backward();
-        return new CN(c);
-      break;
-      case null:
-        return new CN(c);
-      break;
-    }
-  }
-  return null;
-}
-
-function A() {
-  var result=[];
-  var n=parser.nextInteger();
-  var b=parser.nextString();
-  if(b) {
-    b=n?n+" "+b:b;
-    var tmp=B();
-    if(tmp) {
-      return new BR(b,tmp);
-    }
-    return new BN(b);
-  }
-  return null;
-}
-
-function parse() {
-  var result=[];
-  do {
-    result.push(A());
-  } while(parser.nextSymbol()==';');
   return result;
+}
+
+function C(p,b) {
+  print("C");
+  return D(p,b);
+}
+
+
+function B(p) {
+  print("B");
+  var result=null;
+  var bname=null;
+  var n=p.nextInteger();
+  var b=p.nextString();
+  if(typeof b === "string") {
+    if(typeof n === "integer") {
+      bname=n+" "+b;
+    } else {
+      bname=b;
+    }
+    result=C(p,new Atom(AtomType.B,bname));
+  }
+  return result;
+}
+
+function A(p) {
+  print("A");
+  return B(p);
+}
+
+function parse(p) {
+  return A(p);
 }
 
 
 function form_submit() {
 
-  var cite= "John;"+
-            "John 1;"+
-            "John 1-3;"+
-            "John 1:4;"+
-            "John 1:5-10;"+
-            "John 1:6,8;"+
-            "John 1:6,2:6;"+
-            "John 1:6,2:6-10;"+
-            "John 1:6,2:6,8;"+
-            "John 1:6,7,2:6,8-10,13";
+  try {
 
-  var tokens=lex(cite);
+    var tokens=lex(command.value);
 
-  for(token of tokens) {
-    print(JSON.stringify(token)+"\n");
+    for(token of tokens) {
+      print(JSON.stringify(token)+"\n");
+    }
+    print("\n");
+
+    var parser=new Parser(tokens);
+
+    var atoms=parse(parser);
+
+    print(JSON.stringify(atoms)+"\n\n");
+
+    print("OK\n");
+
+  } catch(e) {
+    print("error: "+e.name+" "+e.message);
   }
-  print("\n");
-
-  parser=new Parser(tokens);
-
-  var ranges=parse();
-
-  for(range of ranges) {
-    print(JSON.stringify(range)+"\n\n");
-  }
-
-  print("OK\n");
 
 }
-

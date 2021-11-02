@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <title>JSBibly</title>
+      
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="style.css">
+  
+  </head>
+
+  <body class="fullscreen">
+
+    <div class="main-flex-container">
+
+      <div class="main-flex-items">
+        <div id="output"></div>
+      </div>
+
+      <div class="main-flex-items">
+        <div class="form-container">
+          <form action="javascript:form_submit();">
+            <div class="form-flex-container">
+              <div class="form-flex-items">
+                <input id="command" type="text">
+              </div>
+              <div class="form-flex-items">
+                <input id="submit-button" type="submit" value="send">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="modal" class="modal">
+      <div id="modal-content"></div>
+    </div>
+
+    <script src="preloader.js"></script>
+    <script src="Range.js"></script>
+    <script src="Token.js"></script>
+    <script src="Lexer.js"></script>
+    <script src="Parser.js"></script>
+    <script src="TTS.js"></script>
+    <script src="bibly.js"></script>
+    <script src="main.js"></script>
+
+  </body>
+</html>

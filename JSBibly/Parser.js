@@ -1,31 +1,37 @@
 function Parser(tokens) {
 
   this.tokens=tokens;
-  this.currentTokenIndex=0;
+  this.index=0;
 
-  this.getCurrentToken=function() {
-    return this.tokens[this.currentTokenIndex];
+  this.getToken=function() {
+    return this.tokens[this.index];
   }
 
-  this.getTokenAt=function(index) {
-    return this.tokens[index];
+  this.getType=function() {
+    return this.getToken().type;
+  }
+
+  this.getText=function() {
+    return this.getToken().text;
   }
 
   this.walk=function(offset) {
-    if( this.currentTokenIndex+offset>=0 &&
-        this.currentTokenIndex+offset<this.tokens.length) {
-      this.currentTokenIndex+=offset;
-      return true;
+    var result=false;
+    if( this.index+offset>=0 &&
+        this.index+offset<this.tokens.length) {
+      this.index+=offset;
+      result=true;
     }
-    return false
+    return result;
   }
 
   this.jump=function(index) {
-    if(index>=0 && index<this.tokens.length) {
-      this.currentTokenIndex=index;
-      return true;
+    var result=false;
+    if( index>=0 && index<this.tokens.length) {
+      this.index=index;
+      result=true;
     }
-    return false
+    return result;
   }
 
   this.forward=function() {
@@ -37,13 +43,13 @@ function Parser(tokens) {
   }
 
   this.match=function(type) {
-    return this.getCurrentToken().type==type;
+    return this.getType()==type;
   }
 
   this.nextInteger=function() {
     var result=null;
     if(this.match(TokenType.INTEGER)) {
-      result=parseInt(this.getCurrentToken().text);
+      result=parseInt(this.getText());
       this.forward();
     }
     return result;
@@ -52,7 +58,7 @@ function Parser(tokens) {
   this.nextString=function() {
     var result=null;
     if(this.match(TokenType.STRING)) {
-      result=this.getCurrentToken().text;
+      result=this.getText();
       this.forward();
     }
     return result;
@@ -61,10 +67,23 @@ function Parser(tokens) {
   this.nextSymbol=function() {
     var result=null;
     if(this.match(TokenType.SYMBOL)) {
-      result=this.getCurrentToken().text;
+      result=this.getText();
       this.forward();
     }
     return result;
+  }
+
+  this.eat=function(type) {
+    var result=false;
+    if(this.match(type)) {
+      this.forward();
+      result=true;
+    }
+    return result;
+  }
+
+  this.isEOF=function() {
+    return this.match(TokenType.EOF);
   }
 
 }
